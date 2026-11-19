@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unit 1: Yourself and Others | Interactive B2 Practice</title>
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary: #ec4899;
+            --accent: #f59e0b;
+            --success: #10b981;
+            --error: #ef4444;
+            --bg: #f1f5f9;
+            --card: #ffffff;
+            --text: #1e293b;
+            --muted: #64748b;
+        }
+
+        * { box-sizing: border-box; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
+        body { background-color: var(--bg); color: var(--text); margin: 0; padding: 0; }
+
+        /* Barra superior gamificada */
+        .topbar {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 15px 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.25);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .brand h1 { margin: 0; font-size: 1.3rem; }
+        .brand span { font-size: 0.85rem; opacity: 0.9; }
+
+        .stats-bar { display: flex; gap: 15px; align-items: center; }
+        .stat-pill {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(5px);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .progress-wrapper { width: 100%; background: rgba(255,255,255,0.25); height: 6px; border-radius: 4px; overflow: hidden; margin-top: 8px; }
+        .progress-fill { height: 100%; background: #fde047; width: 0%; transition: width 0.4s ease; }
+
+        /* Navegación por pestañas */
+        .container { max-width: 960px; margin: 25px auto; padding: 0 15px 60px; }
+        .tabs {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        .tab-btn {
+            background: var(--card);
+            border: 2px solid #e2e8f0;
+            color: var(--muted);
+            padding: 10px 16px;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s;
+        }
+
+        .tab-btn:hover { border-color: var(--primary); color: var(--primary); }
+        .tab-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+            box-shadow: 0 4px 10px rgba(99, 102, 241, 0.3);
+        }
+
+        .section { display: none; animation: fadeIn 0.3s ease; }
+        .section.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+        .card {
+            background: var(--card);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            border: 1px solid #e2e8f0;
+        }
+
+        .card h2 { margin-top: 0; color: var(--primary-dark); display: flex; align-items: center; gap: 10px; }
+        .badge { background: #e0e7ff; color: var(--primary-dark); font-size: 0.75rem; padding: 3px 10px; border-radius: 12px; }
+
+        /* Elementos interactivos */
+        .question-row {
+            padding: 12px;
+            border-bottom: 1px solid #f1f5f9;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+        }
+
+        select, input[type="text"], textarea {
+            padding: 8px 12px;
+            border: 2px solid #cbd5e1;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        select:focus, input[type="text"]:focus, textarea:focus { border-color: var(--primary); }
+
+        .btn-check {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: transform 0.1s, background 0.2s;
+        }
+        .btn-check:hover { background: var(--primary-dark); transform: scale(1.02); }
+
+        .feedback {
+            margin-top: 8px;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            width: 100%;
+            display: none;
+        }
+        .feedback.ok { display: block; background: #d1fae5; color: #065f46; }
+        .feedback.ko { display: block; background: #fee2e2; color: #991b1b; }
+
+        /* Audio player */
+        .audio-box {
+            background: #f8fafc;
+            border: 2px dashed var(--primary);
+            padding: 18px;
+            border-radius: 12px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        audio { width: 100%; max-width: 500px; margin-top: 10px; }
+
+        /* Reading / Text layout */
+        .reading-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        @media (max-width: 768px) { .reading-grid { grid-template-columns: 1fr; } }
+        .text-box { background: #f8fafc; padding: 16px; border-radius: 12px; border-left: 4px solid var(--secondary); font-size: 0.93rem; line-height: 1.6; max-height: 520px; overflow-y: auto; }
+
+        /* Writing */
+        textarea { width: 100%; min-height: 180px; resize: vertical; line-height: 1.5; }
+        .word-counter { font-weight: bold; color: var(--muted); margin-top: 6px; text-align: right; }
+        .word-counter.good { color: var(--success); }
+
+        /* Medallas */
+        .medals { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
+        .medal { padding: 6px 12px; border-radius: 20px; font-size: 0.85rem; background: #e2e8f0; color: #94a3b8; font-weight: 600; }
+        .medal.unlocked { background: #fef3c7; color: #b45309; border: 1px solid #f59e0b; }
+    </style>
+</head>
+<body>
+
+<div class="topbar">
+    <div class="brand">
+        <h1>🚀 Unit 1: Yourself and Others</h1>
+        <span>4º ESO • Entrenamiento Interactivo B2</span>
+        <div class="progress-wrapper"><div class="progress-fill" id="progressBar"></div></div>
+    </div>
+    <div class="stats-bar">
+        <div class="stat-pill">⭐ <span id="xpCount">0</span> XP</div>
+        <div class="stat-pill">🔥 Racha: <span id="streakCount">0</span></div>
+        <div class="stat-pill" id="rankLabel">🌱 Rookie</div>
+    </div>
+</div>
+
+<div class="container">
+    <!-- Logros -->
+    <div class="card" style="padding: 15px 20px;">
+        <div style="font-weight: bold; font-size: 0.9rem; color: var(--muted);">🏆 Tus insignias de hoy:</div>
+        <div class="medals">
+            <div class="medal" id="medal-reading">📖 Lectora Ágil</div>
+            <div class="medal" id="medal-grammar">⚡ Maestra del Presente</div>
+            <div class="medal" id="medal-listening">🎧 Oído B2</div>
+            <div class="medal" id="medal-uoe">🧩 Experta en Prefijos/Sufijos</div>
+            <div class="medal" id="medal-writing">✍️ Escritora Top</div>
+        </div>
+    </div>
+
+    <!-- Pestañas -->
+    <div class="tabs">
+        <button class="tab-btn active" onclick="openTab('tab1', this)">1. Reading (Part 7)</button>
+        <button class="tab-btn" onclick="openTab('tab2', this)">2. Grammar (Present)</button>
+        <button class="tab-btn" onclick="openTab('tab3', this)">3. Listening (Part 1)</button>
+        <button class="tab-btn" onclick="openTab('tab4', this)">4. Use of English (Part 3)</button>
+        <button class="tab-btn" onclick="openTab('tab5', this)">5. Writing (Part 2)</button>
+    </div>
+
+    <!-- SECCIÓN 1: READING PART 7 -->
+    <div id="tab1" class="section active">
+        <div class="card">
+            <h2>📖 Reading & Use of English - Part 7 <span class="badge">Multiple Matching</span></h2>
+            <p>Lee los perfiles de las cuatro personas (<strong>A: Nadia, B: Liam, C: Maxim, D: Camille</strong>) en tu ficha y selecciona qué persona corresponde a cada afirmación (1–10).</p>
+            
+            <div class="reading-grid">
+                <div id="readingQuestions"></div>
+                <div class="text-box">
+                    <strong>Guía rápida de los perfiles (A–D):</strong><br><br>
+                    <strong>A - Nadia Hassan:</strong> Amiga de Amina desde los 14 años. Empezaron a conocerse al practicar equitación juntas. Nadia es pesimista y Amina muy optimista. Hace un par de años dejaron de hablarse un tiempo.<br><br>
+                    <strong>B - Liam Doherty:</strong> Conoció a Marc en un trabajo de verano en un hotel. Marc tiene un buen trabajo y viaja mucho, mientras que Liam gana menos dinero y prefiere una vida tranquila leyendo o haciendo senderismo.<br><br>
+                    <strong>C - Maxim Salenko:</strong> Amigo de Andriy desde primaria. Crecieron en entornos familiares muy parecidos. A veces la gente cree que Andriy es mandón (bossy), pero Maxim niega que sea verdad.<br><br>
+                    <strong>D - Camille Leroy:</strong> Conoce a Lara desde hace 3 años. Al principio no congeniaron en una fiesta porque Lara parecía antipática, aunque en realidad era muy tímida. Ahora se llevan genial y Lara cuenta muy buenos chistes.
+                </div>
+            </div>
+            <button class="btn-check" onclick="checkReading()">Comprobar Reading (+100 XP)</button>
+        </div>
+    </div>
+
+    <!-- SECCIÓN 2: GRAMMAR -->
+    <div id="tab2" class="section">
+        <div class="card">
+            <h2>⚡ Grammar: Present Tenses <span class="badge">Ejercicio 1</span></h2>
+            <p>Algunas frases tienen errores en el uso de <em>Present Simple</em> o <em>Present Continuous</em>. Escribe la corrección del verbo/fragmento o escribe <strong>correct</strong> si la frase está bien.</p>
+            <div id="grammar1Container"></div>
+            <button class="btn-check" onclick="checkGrammar1()">Comprobar Ejercicio 1</button>
+        </div>
+
+        <div class="card">
+            <h2>⚡ Grammar: Present Tenses <span class="badge">Ejercicio 2</span></h2>
+            <p>Completa cada hueco con la forma correcta en presente simple o continuo usando estos verbos: <strong>end, get, hear, own, rise, see, take, try</strong>.</p>
+            <div id="grammar2Container"></div>
+            <button class="btn-check" onclick="checkGrammar2()">Comprobar Ejercicio 2</button>
+        </div>
+    </div>
+
+    <!-- SECCIÓN 3: LISTENING -->
+    <div id="tab3" class="section">
+        <div class="card">
+            <h2>🎧 Listening - Part 1 <span class="badge">Audio Track 02</span></h2>
+            <div class="audio-box">
+                <div><strong>Reproductor del ejercicio (Pista 02)</strong></div>
+                <small style="color: var(--muted);">Escucha las 4 situaciones dos veces y elige la opción correcta (A, B o C).</small><br>
+                <audio controls src="CompactFirst2ed_WB_02.mp3">
+                    Tu navegador no soporta el elemento de audio.
+                </audio>
+            </div>
+            <div id="listeningContainer"></div>
+            <button class="btn-check" onclick="checkListening()">Comprobar Listening</button>
+        </div>
+    </div>
+
+    <!-- SECCIÓN 4: USE OF ENGLISH PART 3 -->
+    <div id="tab4" class="section">
+        <div class="card">
+            <h2>🧩 Use of English - Part 3 <span class="badge">Word Formation (Ej. 1)</span></h2>
+            <p>Corrige la palabra errónea de cada frase transformando la palabra entre paréntesis con un prefijo o sufijo.</p>
+            <div id="uoe1Container"></div>
+            <button class="btn-check" onclick="checkUOE1()">Comprobar Ejercicio 1</button>
+        </div>
+
+        <div class="card">
+            <h2>🧩 Exam Task: Staying safe online <span class="badge">Gaps 1–8</span></h2>
+            <p>Transforma cada palabra en MAYÚSCULAS para completar los 8 huecos del texto <em>"Staying safe online"</em>:</p>
+            <div id="uoeExamContainer"></div>
+            <button class="btn-check" onclick="checkUOEExam()">Comprobar Exam Task</button>
+        </div>
+    </div>
+
+    <!-- SECCIÓN 5: WRITING -->
+    <div id="tab5" class="section">
+        <div class="card">
+            <h2>✍️ Writing - Part 2: Informal Email <span class="badge">140–190 palabras</span></h2>
+            <p><strong>Tarea:</strong> Tu amigo Sam te ha escrito contándote que se lleva muy bien con su hermana pequeña. Escríbele un email hablándole de un familiar al que veas mucho y explicando por qué disfrutas pasando tiempo con él o ella.</p>
+            
+            <div style="background:#fefce8; padding:12px; border-radius:10px; border:1px solid #fde047; margin-bottom:15px; font-size:0.9rem;">
+                <strong>💡 Expresiones útiles de Matteo para sumar puntos:</strong><br>
+                <em>Hi Sam, / Thanks for writing. / We get on really well / We've been friends since we were... / We've got lots of things in common / Something I really like about him/her is... / In short, / Hope to hear from you soon. / Bye for now,</em>
+            </div>
+
+            <textarea id="writingArea" placeholder="Hi Sam,
+
+Thanks for writing..." oninput="updateWordCount()"></textarea>
+            <div class="word-counter" id="wordCount">0 palabras (Objetivo: 140 - 190 palabras)</div>
+
+            <div style="margin-top:15px;">
+                <strong>Checklist antes de terminar:</strong><br>
+                <label><input type="checkbox" class="w-check"> Empieza con saludo informal (<em>Hi Sam,</em>)</label><br>
+                <label><input type="checkbox" class="w-check"> Responde a las dos preguntas (qué familiar es y por qué disfrutas con él/ella)</label><br>
+                <label><input type="checkbox" class="w-check"> Usa contracciones (<em>I'm, we've, he's</em>) y adjetivos de personalidad</label><br>
+                <label><input type="checkbox" class="w-check"> Tiene entre 140 y 190 palabras</label>
+            </div>
+            <button class="btn-check" onclick="finishWriting()">Completar Writing (+150 XP)</button>
+            <div id="writingFeedback" class="feedback"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // SISTEMA DE PUNTOS Y MOTIVACIÓN
+    let xp = 0;
+    let streak = 0;
+    const completedSections = new Set();
+
+    function addXP(points, correct = true) {
+        if (correct) {
+            xp += points;
+            streak++;
+        } else {
+            streak = 0;
+        }
+        document.getElementById('xpCount').innerText = xp;
+        document.getElementById('streakCount').innerText = streak;
+        
+        const rank = document.getElementById('rankLabel');
+        if (xp >= 500) rank.innerText = "👑 B2 Legend";
+        else if (xp >= 300) rank.innerText = "🚀 Cambridge Pro";
+        else if (xp >= 120) rank.innerText = "🔥 Rising Star";
+        else rank.innerText = "🌱 Rookie";
+
+        const pct = Math.min(100, Math.round((completedSections.size / 5) * 100));
+        document.getElementById('progressBar').style.width = pct + "%";
+    }
+
+    function unlockMedal(id, sectionIndex) {
+        document.getElementById(id).classList.add('unlocked');
+        completedSections.add(sectionIndex);
+        const pct = Math.min(100, Math.round((completedSections.size / 5) * 100));
+        document.getElementById('progressBar').style.width = pct + "%";
+    }
+
+    function openTab(tabId, btn) {
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById(tabId).classList.add('active');
+        btn.classList.add('active');
+    }
+
+    // DATOS DE ACTIVIDADES (Respuestas oficiales del Answer Key)
+    const readingData = [
+        { q: "1. earns less money than their friend?", ans: "B" },
+        { q: "2. says the two of them did not like each other at first?", ans: "D" },
+        { q: "3. denies that their friend is bossy?", ans: "C" },
+        { q: "4. has had a similar upbringing to their friend's?", ans: "C" },
+        { q: "5. once fell out with their friend?", ans: "A" },
+        { q: "6. shares a hobby with their friend?", ans: "A" },
+        { q: "7. says their friend has a good sense of humour?", ans: "D" },
+        { q: "8. describes their friend as rather shy?", ans: "D" },
+        { q: "9. has a friend who is very optimistic?", ans: "A" },
+        { q: "10. has a very ambitious friend?", ans: "B" }
+    ];
+
+    const grammar1Data = [
+        { s: "1. I'm belonging to a tennis club and it is my favourite sport.", ans: ["i belong"], exp: "'Belong' es un verbo de estado (stative verb), no va en continua." },
+        { s: "2. I'll pick you up from the airport when you'll arrive at 9.30.", ans: ["when you arrive"], exp: "Tras 'when' con valor de futuro usamos Present Simple." },
+        { s: "3. I'm having a lovely holiday here on the island.", ans: ["correct"], exp: "Correcta: aquí 'have' significa disfrutar/pasar un momento, sí admite continua." },
+        { s: "4. Every day we are spending about eight hours at work.", ans: ["we spend"], exp: "'Every day' indica rutina -> Present Simple." },
+        { s: "5. When you will receive my letter, please tell Mary about this.", ans: ["when you receive"], exp: "Cláusula temporal con 'when' -> Present Simple." },
+        { s: "6. Pablo is needing to talk to somebody, but he never calls me.", ans: ["needs"], exp: "'Need' es un verbo de estado -> Present Simple." },
+        { s: "7. Nowadays it becomes more and more important to have a good education.", ans: ["it is becoming", "it's becoming"], exp: "Cambio gradual en progreso ('nowadays') -> Present Continuous." },
+        { s: "8. I promise that I'll phone you tonight when I get home.", ans: ["correct"], exp: "Correcta: Present Simple tras 'when'." },
+        { s: "9. I need to earn some money, and this is the main reason why I apply for this job.", ans: ["i'm applying", "i am applying"], exp: "Acción temporal en curso -> Present Continuous." },
+        { s: "10. They are the kind of people who are driving to work every day in big cars.", ans: ["who drive"], exp: "Hábito habitual ('every day') -> Present Simple." }
+    ];
+
+    const grammar2Data = [
+        { s: "1. I usually go to work by car, but this week I ________ the train because the road bridge is closed.", ans: ["'m taking", "am taking"] },
+        { s: "2. It ________ harder to find a job and youth unemployment is now very high.", ans: ["'s getting", "is getting"] },
+        { s: "3. As soon as the college term ________, I'm going away on holiday.", ans: ["ends"] },
+        { s: "4. Her parents are very rich. They ________ homes in both London and New York.", ans: ["own"] },
+        { s: "5. I ________ Marcos later this evening, when he leaves the club.", ans: ["'m seeing", "am seeing"] },
+        { s: "6. Please turn the music down a bit. I ________ to sleep.", ans: ["'m trying", "am trying"] },
+        { s: "7. In every part of the world, the sun ________ in the east.", ans: ["rises"] },
+        { s: "8. I promise I'll get up as soon as I ________ the alarm clock.", ans: ["hear"] }
+    ];
+
+    const listeningData = [
+        { q: "1. Teenager talking about her new bedroom. What does she like about it?", opts: ["A) the way it is decorated", "B) the furniture in it", "C) its size and shape"], ans: "A" },
+        { q: "2. Conversation on a bus. Where is the man going first?", opts: ["A) to a shop", "B) to the library", "C) to work"], ans: "B" },
+        { q: "3. Man talking on the phone. Why is he calling?", opts: ["A) to apologise", "B) to ask for information", "C) to complain"], ans: "A" },
+        { q: "4. Interview with a businesswoman. What does she do?", opts: ["A) She hires out bicycles.", "B) She hires out cars.", "C) She hires out motorcycles."], ans: "C" }
+    ];
+
+    const uoe1Data = [
+        { s: "1. I am worry (WORRY) about you, so can I talk to you?", ans: "worried" },
+        { s: "2. You are always stressy (STRESS) when you do that job.", ans: "stressed" },
+        { s: "3. Recommendations for the most attraction (ATTRACT) places in my town.", ans: "attractive" },
+        { s: "4. I was terrorised (TERRIFY).", ans: "terrified" },
+        { s: "5. Your report is absolutely inacceptable (ACCEPT).", ans: "unacceptable" },
+        { s: "6. It was really surprised (SURPRISE) to hear that Marta was the winner.", ans: "surprising" },
+        { s: "7. The streets wouldn't be so crowdy (CROWD).", ans: "crowded" },
+        { s: "8. Staying at your house next week will be really enjoyful (ENJOY).", ans: "enjoyable" },
+        { s: "9. That festival was a completely unorganised (ORGANISE) event.", ans: "disorganised" },
+        { s: "10. There are some interesting and impressing (IMPRESS) museums.", ans: "impressive" }
+    ];
+
+    const uoeExamData = [
+        { num: 1, key: "TIRE", hint: "after a (1) ________ day at school", ans: ["tiring"] },
+        { num: 2, key: "SOCIETY", hint: "something much more (2) ________", ans: ["sociable"] },
+        { num: 3, key: "INCREASE", hint: "on (3) ________ popular social networking sites", ans: ["increasingly"] },
+        { num: 4, key: "WORRY", hint: "What some parents find rather (4) ________", ans: ["worrying"] },
+        { num: 5, key: "ENTHUSIASM", hint: "children are so (5) ________ putting onto these websites", ans: ["enthusiastically"] },
+        { num: 6, key: "ANXIETY", hint: "Parents are right to be (6) ________", ans: ["anxious"] },
+        { num: 7, key: "PRACTICE", hint: "it is simply (7) ________ for adults constantly to watch over them", ans: ["impractical", "impracticable"] },
+        { num: 8, key: "CAUTION", hint: "advise them to be extremely (8) ________ about contact with strangers", ans: ["cautious"] }
+    ];
+
+    // RENDERIZADO INICIAL
+    function init() {
+        const rCont = document.getElementById('readingQuestions');
+        readingData.forEach((item, i) => {
+            rCont.innerHTML += `
+                <div class="question-row">
+                    <span>${item.q}</span>
+                    <select id="r-${i}">
+                        <option value="">--</option>
+                        <option value="A">A (Nadia)</option>
+                        <option value="B">B (Liam)</option>
+                        <option value="C">C (Maxim)</option>
+                        <option value="D">D (Camille)</option>
+                    </select>
+                    <div class="feedback" id="rf-${i}"></div>
+                </div>`;
+        });
+
+        const g1Cont = document.getElementById('grammar1Container');
+        grammar1Data.forEach((item, i) => {
+            g1Cont.innerHTML += `
+                <div class="question-row">
+                    <div style="flex:1;">${item.s}</div>
+                    <input type="text" id="g1-${i}" placeholder="Corrección o 'correct'">
+                    <div class="feedback" id="g1f-${i}"></div>
+                </div>`;
+        });
+
+        const g2Cont = document.getElementById('grammar2Container');
+        grammar2Data.forEach((item, i) => {
+            g2Cont.innerHTML += `
+                <div class="question-row">
+                    <div style="flex:1;">${item.s}</div>
+                    <input type="text" id="g2-${i}" placeholder="Verbo conjugado">
+                    <div class="feedback" id="g2f-${i}"></div>
+                </div>`;
+        });
+
+        const lCont = document.getElementById('listeningContainer');
+        listeningData.forEach((item, i) => {
+            lCont.innerHTML += `
+                <div class="question-row">
+                    <div style="flex:1;"><strong>${item.q}</strong><br><small>${item.opts.join(' • ')}</small></div>
+                    <select id="l-${i}">
+                        <option value="">Elige...</option>
+                        <option value="A">A</option>
+                        <option value="B">B</option>
+                        <option value="C">C</option>
+                    </select>
+                    <div class="feedback" id="lf-${i}"></div>
+                </div>`;
+        });
+
+        const u1Cont = document.getElementById('uoe1Container');
+        uoe1Data.forEach((item, i) => {
+            u1Cont.innerHTML += `
+                <div class="question-row">
+                    <div style="flex:1;">${item.s}</div>
+                    <input type="text" id="u1-${i}" placeholder="Palabra correcta">
+                    <div class="feedback" id="u1f-${i}"></div>
+                </div>`;
+        });
+
+        const ueCont = document.getElementById('uoeExamContainer');
+        uoeExamData.forEach((item, i) => {
+            ueCont.innerHTML += `
+                <div class="question-row">
+                    <div style="flex:1;"><strong>(${item.num})</strong> ...${item.hint}... <span class="badge">${item.key}</span></div>
+                    <input type="text" id="ue-${i}" placeholder="Palabra formada">
+                    <div class="feedback" id="uef-${i}"></div>
+                </div>`;
+        });
+    }
+
+    // CORRECCIONES
+    function checkReading() {
+        let hits = 0;
+        readingData.forEach((item, i) => {
+            const val = document.getElementById(`r-${i}`).value;
+            const fb = document.getElementById(`rf-${i}`);
+            if (val === item.ans) {
+                fb.className = "feedback ok";
+                fb.innerText = "✅ ¡Correcto!";
+                hits++;
+                addXP(10, true);
+            } else {
+                fb.className = "feedback ko";
+                fb.innerText = `❌ Respuesta correcta: ${item.ans}`;
+                addXP(0, false);
+            }
+        });
+        if (hits >= 7) unlockMedal('medal-reading', 1);
+    }
+
+    function checkGrammar1() {
+        let hits = 0;
+        grammar1Data.forEach((item, i) => {
+            const val = document.getElementById(`g1-${i}`).value.trim().toLowerCase();
+            const fb = document.getElementById(`g1f-${i}`);
+            if (item.ans.includes(val)) {
+                fb.className = "feedback ok";
+                fb.innerText = `✅ ¡Bien! ${item.exp}`;
+                hits++;
+                addXP(10, true);
+            } else {
+                fb.className = "feedback ko";
+                fb.innerText = `❌ Solución: ${item.ans[0]} — ${item.exp}`;
+                addXP(0, false);
+            }
+        });
+        if (hits >= 7) unlockMedal('medal-grammar', 2);
+    }
+
+    function checkGrammar2() {
+        grammar2Data.forEach((item, i) => {
+            const val = document.getElementById(`g2-${i}`).value.trim().toLowerCase();
+            const fb = document.getElementById(`g2f-${i}`);
+            if (item.ans.includes(val)) {
+                fb.className = "feedback ok";
+                fb.innerText = "✅ ¡Correcto!";
+                addXP(10, true);
+            } else {
+                fb.className = "feedback ko";
+                fb.innerText = `❌ Solución: ${item.ans[0]}`;
+                addXP(0, false);
+            }
+        });
+    }
+
+    function checkListening() {
+        let hits = 0;
+        listeningData.forEach((item, i) => {
+            const val = document.getElementById(`l-${i}`).value;
+            const fb = document.getElementById(`lf-${i}`);
+            if (val === item.ans) {
+                fb.className = "feedback ok";
+                fb.innerText = "✅ ¡Exacto!";
+                hits++;
+                addXP(20, true);
+            } else {
+                fb.className = "feedback ko";
+                fb.innerText = `❌ La respuesta correcta era la ${item.ans}`;
+                addXP(0, false);
+            }
+        });
+        if (hits >= 3) unlockMedal('medal-listening', 3);
+    }
+
+    function checkUOE1() {
+        uoe1Data.forEach((item, i) => {
+            const val = document.getElementById(`u1-${i}`).value.trim().toLowerCase();
+            const fb = document.getElementById(`u1f-${i}`);
+            if (val === item.ans) {
+                fb.className = "feedback ok";
+                fb.innerText = "✅ ¡Correcto!";
+                addXP(10, true);
+            } else {
+                fb.className = "feedback ko";
+                fb.innerText = `❌ Forma correcta: ${item.ans}`;
+                addXP(0, false);
+            }
+        });
+    }
+
+    function checkUOEExam() {
+        let hits = 0;
+        uoeExamData.forEach((item, i) => {
+            const val = document.getElementById(`ue-${i}`).value.trim().toLowerCase();
+            const fb = document.getElementById(`uef-${i}`);
+            if (item.ans.includes(val)) {
+                fb.className = "feedback ok";
+                fb.innerText = "✅ ¡Perfecto!";
+                hits++;
+                addXP(15, true);
+            } else {
+                fb.className = "feedback ko";
+                fb.innerText = `❌ Solución: ${item.ans.join(' / ')}`;
+                addXP(0, false);
+            }
+        });
+        if (hits >= 6) unlockMedal('medal-uoe', 4);
+    }
+
+    function updateWordCount() {
+        const text = document.getElementById('writingArea').value.trim();
+        const words = text ? text.split(/\s+/).length : 0;
+        const counter = document.getElementById('wordCount');
+        counter.innerText = `${words} palabras (Objetivo: 140 - 190 palabras)`;
+        counter.className = (words >= 140 && words <= 190) ? "word-counter good" : "word-counter";
+    }
+
+    function finishWriting() {
+        const text = document.getElementById('writingArea').value.trim();
+        const words = text ? text.split(/\s+/).length : 0;
+        const fb = document.getElementById('writingFeedback');
+        if (words < 100) {
+            fb.className = "feedback ko";
+            fb.innerText = `⚠️ Llevas ${words} palabras. Intenta llegar al menos a 140 palabras antes de entregarlo.`;
+        } else {
+            fb.className = "feedback ok";
+            fb.innerText = `🎉 ¡Genial! Has escrito ${words} palabras. Ya puedes enseñárselo a tu profe para revisarlo.`;
+            addXP(150, true);
+            unlockMedal('medal-writing', 5);
+        }
+    }
+
+    window.onload = init;
+</script>
+</body>
+</html>
